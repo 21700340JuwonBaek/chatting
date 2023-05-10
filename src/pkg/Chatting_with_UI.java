@@ -1,15 +1,19 @@
 package pkg;
 
 import chatUser.Chat_User;
+import message.Message;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import message.Message;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -22,6 +26,7 @@ class ServerThread extends Thread{
     ObjectInputStream objectStream = null;
     FileInputStream fileInputStream = null;
     String savePath = "./savePath";
+
     ServerThread(Socket socket, TextArea noticeArea, TextArea dialogArea){
         this.socket = socket;
         this.noticeArea = noticeArea;
@@ -72,17 +77,6 @@ class ServerThread extends Thread{
                     }
                 }
             }
-        } catch (FileNotFoundException e) {
-            System.out.println("File 존재하지 않음");
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            System.out.println("서버와의 연결 종료");
-            System.exit(-1);
-            throw new RuntimeException(e);
-
-        } catch (ClassNotFoundException e) {
-            System.out.println("클래스 캐스팅이 잘못되었음");
-            throw new RuntimeException(e);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -98,19 +92,29 @@ public class Chatting_with_UI extends Application {
     @Override
     public void start(Stage arg0) throws Exception {
         //Set Nickname
-        VBox setNicknameBox = new VBox();
-        setNicknameBox.setPrefSize(300, 500);
+        GridPane setNicknameBox = new GridPane();
+        setNicknameBox.setMinSize(300, 500);
+        setNicknameBox.setPadding(new Insets(10,10,10,10));
+        setNicknameBox.setVgap(5);
+        setNicknameBox.setHgap(5);
+        setNicknameBox.setAlignment(Pos.CENTER);
         Chat_User user = new Chat_User();
 
         TextField nicknameField = new TextField();
         Button setNicknameBtn = new Button("닉네임 설정");
 
-        setNicknameBox.getChildren().addAll(nicknameField,setNicknameBtn);
+        setNicknameBox.add(nicknameField, 0, 0);
+        setNicknameBox.add(setNicknameBtn, 1, 0);
+
+//        setNicknameBox.getChildren().addAll(nicknameField,setNicknameBtn);
         Scene setNicknameScene = new Scene(setNicknameBox);
 
         //Dialog Scene-----------------------------
-        VBox dialogBox = new VBox();
-        dialogBox.setPrefSize(300, 500);
+        GridPane dialogBox = new GridPane();
+        dialogBox.setMinSize(300, 500);
+        dialogBox.setPadding(new Insets(10,10,10,10));
+        dialogBox.setVgap(5);
+        dialogBox.setHgap(5);
 
         Button sendBtn = new Button("전송");
         sendBtn.setLayoutY(300);
@@ -123,7 +127,12 @@ public class Chatting_with_UI extends Application {
         TextArea noticeArea = new TextArea();
         TextArea dialogArea = new TextArea();
 
-        dialogBox.getChildren().addAll(noticeArea, dialogArea,sendBtn, sendFileBtn, messageField, chkNoti);
+        dialogBox.add(noticeArea,0, 0);
+        dialogBox.add(dialogArea,0, 1);
+        dialogBox.add(sendBtn,2, 2);
+        dialogBox.add(sendFileBtn,0,3);
+        dialogBox.add(messageField,1,2);
+        dialogBox.add(chkNoti,0,2);
         Scene dialogScene = new Scene(dialogBox);
 
         Alert a = new Alert(Alert.AlertType.INFORMATION);
@@ -150,7 +159,7 @@ public class Chatting_with_UI extends Application {
     해당부분 message 에 user 삽입 하는 것으로
                         message.setName(nickname);
     */
-                        message.setMsg(nickname+"님, 환영합니다.");
+                        message.setMsg(nickname + "님, 환영합니다.");
                         message.setUser(user);
                         message.setNotice(false);
                         message.setFile(null, null, 0);
@@ -163,17 +172,8 @@ public class Chatting_with_UI extends Application {
                     else{
                         a.show();
                     }
-                } catch (IOException e) {
-                    System.out.println("서버와의 접속이 종료");
-
+                } catch (Exception e) {
                     e.printStackTrace();
-
-                    //TODO: 서버와의 연결이 종료되면 굳이 프로세스가 실행될 필요가 없다. 종료..!
-                    System.exit(-1);
-
-                } catch (Exception e2) {
-                    System.out.println("기타 에러 발생");
-                    e2.printStackTrace();
                 }
             }
         });
